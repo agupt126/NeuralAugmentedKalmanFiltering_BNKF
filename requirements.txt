@@ -1,0 +1,14 @@
+jupyter
+pandas~=2.2.1
+numpy~=1.26.4
+matplotlib~=3.9.2
+scikit-learn~=1.6.0
+gensim
+seaborn
+pillow
+torch~=2.5.1
+tqdm~=4.67.0
+torchbnn~=1.2
+stonesoup~=1.5
+scipy~=1.13.1
+statsmodels
