@@ -183,6 +183,30 @@ class StonesoupRadarSim:
 
         return generated_track_states
 
+
+    def extract_radar_meas_info(self, observations):
+        meas_dict = {
+            "range": [],
+            "azimuth": [],
+            "elevation": [],
+            "range_rate": []
+        }
+
+        for det in observations:
+            z = np.asarray(det.state_vector).ravel()
+
+            elevation = z[0]
+            azimuth = z[1]
+            range = z[2]
+            range_rate = z[3]
+
+            meas_dict["range"].append(range)
+            meas_dict["azimuth"].append(azimuth)
+            meas_dict["elevation"].append(elevation)
+            meas_dict["range_rate"].append(range_rate)
+
+        return meas_dict
+
     def convert_radar_observations_to_cartesian(self, observations):
         if self.incl_velocity:
             substates = ('x', 'vx', 'y', 'vy', 'z', 'vz')

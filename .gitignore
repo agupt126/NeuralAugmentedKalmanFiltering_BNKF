@@ -78,6 +78,10 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# PyTorch and model checkpoint files
+*.pth
+saved_models/
+
 # IPython
 profile_default/
 ipython_config.py

@@ -124,8 +124,6 @@ class BNKF(nn.Module):
             z_obs, sig_obs = physics_metadata['inputObs'], physics_metadata['inputRngErr']
             pos_in, vel_in, dt_in = physics_metadata['inputPos'], physics_metadata['inputVel'], physics_metadata['dtVec']
             state_est_fused = state_est_mu
-            #state_est_physics = self.forward_physics(pos_in, vel_in, dt_in)
-            #state_est_fused = self.lambda_ml*state_est_mu + self.lambda_kinematic_physics*state_est_physics
             predicted_state, predicted_cov = self.__kalman_update(state_est_fused, state_est_p, z_obs, sig_obs)
         else:
             predicted_state = state_est_mu.numpy()

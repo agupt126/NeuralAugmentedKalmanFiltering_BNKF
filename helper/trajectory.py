@@ -48,6 +48,11 @@ class Trajectory:
         self.vel = False
         self.remove_pct = None
 
+        self.measured_range = None
+        self.measured_range_rate = None
+        self.measured_azimuth = None
+        self.measured_elevation = None
+
     def __construct_stonesoup_truth(self):
         self.truth_state_traj = GroundTruthPath([GroundTruthState(
             [self.truth_x[0], self.truth_vx[0], self.truth_y[0], self.truth_vy[0], self.truth_z[0], self.truth_vz[0]],
@@ -92,6 +97,29 @@ class Trajectory:
         if self.measurement_only_eval:
             self.__construct_stonesoup_truth()
         return None
+
+    def set_original_measurement_data(self, measurement_data, vel=False):
+        assert len(measurement_data['range']) == len(measurement_data['azimuth']) == len(measurement_data['elevation'])
+
+        if len(self.truth_time_data_filtered_indices) == 0 or self.measurement_only_eval:
+            self.measured_range = np.array(measurement_data['range']).ravel()
+            self.measured_azimuth = np.array(measurement_data['azimuth']).ravel()
+            self.measured_elevation = np.array(measurement_data['elevation']).ravel()
+
+            if vel:
+                self.measured_range_rate = np.array(measurement_data['range_rate']).ravel()
+
+        else:
+            self.measured_range = np.delete(np.array(measurement_data['range']).ravel(), self.truth_time_data_filtered_indices)
+            self.measured_azimuth = np.delete(np.array(measurement_data['azimuth']).ravel(), self.truth_time_data_filtered_indices)
+            self.measured_elevation = np.delete(np.array(measurement_data['elevation']).ravel(), self.truth_time_data_filtered_indices)
+
+            if vel:
+                self.measured_range_rate = np.delete(np.array(measurement_data['range_rate']).ravel(),self.truth_time_data_filtered_indices)
+
+        self.vel = vel
+        return None
+
 
     def set_converted_measurement_data(self, measurement_data, vel=False):
         assert len(measurement_data['x']) == len(measurement_data['y']) == len(
@@ -143,7 +171,12 @@ class Trajectory:
                 "measured_vx": self.measured_vx,
                 "measured_vy": self.measured_vy,
                 "measured_vz": self.measured_vz,
+                "measured_range": self.measured_range,
+                "measured_azimuth": self.measured_azimuth,
+                "measured_elevation": self.measured_elevation,
+                "measured_range_rate": self.measured_range_rate
             }
+
         else:
             data = {
                 "timestamp": self.truth_time_data,
@@ -156,6 +189,9 @@ class Trajectory:
                 "measured_x": self.measured_x,
                 "measured_y": self.measured_y,
                 "measured_z": self.measured_z,
+                "measured_range": self.measured_range,
+                "measured_azimuth": self.measured_azimuth,
+                "measured_elevation": self.measured_elevation,
             }
         return pd.DataFrame(data)
 
@@ -167,6 +203,9 @@ class Trajectory:
         altered_df['measured_plus_x'] = aDF['measured_x'].shift(-1, fill_value=0)
         altered_df['measured_plus_y'] = aDF['measured_y'].shift(-1, fill_value=0)
         altered_df['measured_plus_z'] = aDF['measured_z'].shift(-1, fill_value=0)
+        altered_df['measured_plus_range'] = aDF['measured_range'].shift(-1, fill_value=0)
+        altered_df['measured_plus_azimuth'] = aDF['measured_azimuth'].shift(-1, fill_value=0)
+        altered_df['measured_plus_elevation'] = aDF['measured_elevation'].shift(-1, fill_value=0)
 
         altered_df['sigma_range'] = self.sigma_range
         altered_df['sigma_range_rate'] = self.sigma_range_rate
@@ -177,6 +216,7 @@ class Trajectory:
             altered_df['measured_plus_vx'] = aDF['measured_vx'].shift(-1, fill_value=0)
             altered_df['measured_plus_vy'] = aDF['measured_vy'].shift(-1, fill_value=0)
             altered_df['measured_plus_vz'] = aDF['measured_vz'].shift(-1, fill_value=0)
+            altered_df['measured_plus_range_rate'] = aDF['measured_range_rate'].shift(-1, fill_value=0)
         return altered_df
 
     def visualize_3d_scatter(self, orig=False, save_fig=False):
